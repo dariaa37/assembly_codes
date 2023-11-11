@@ -1,0 +1,622 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/09/23 23:20:39
+EJ07.ASM						     Page 1 - 1
+
+
+				; Nombre del programa : EJ07.ASM
+				; Objetivo : Realizar operaciones de suma, resta multiplicación división
+				; sobre dos cantidades enteras sin signo y no mayores que
+				; 65535.
+				; ***********************************************************
+				; COMANDO DE ENSAMBLE : Masm EJ07.ASM;
+				; COMANDO DE ENLACE : Link EJ07.OBJ;
+				; COMANDO DE EJECUCION : EJ07 [Enter]
+				; ********************************************** //fila 10
+				; NOTA : se procura usar SOLO las instrucciones que se han visto o explicado. El objetivo
+				; es educativo y NO de optimizar o eficientar. Por favor, NO SE DESESPERE
+				; y estúdielo.
+				; ***********************************************************
+				; Define el modelo de memoria
+				.MODEL SMALL
+ 0000				.Data
+ 0000 00			    ErrorCAP DB 0                     ; Bandera de error en la captura de las cantidades
+ 0001 00			    Cantidad DB 0                     ; La cantidad sobre la que se opera. Si es 0 se opera
+				                                    ; sobre la cantidad 1, si es 1 se opera sobre la
+				    ; fila 20
+				    ; cantidad 2.
+ 0002 0000			    CantUnoR DW 0                     ; Variable que guarda la cantidad uno convertida a binario.
+ 0004 0000			    CantDosR DW 0                     ; Variable que guarda la cantidad 2 convertida a binario.
+ 0006 06 00			    CantUnoN DB 6,0,6 DUP(?)          ; Variable que almacena la cantidad 1
+       0006 [
+        00
+       ]
+ 000E 06 00			    CantDosN DB 6,0,6 DUP(?)          ; Variable que almacena la cantidad 2
+       0006 [
+        00
+       ]
+ 0016 00			    Funcion DB 0                      ; Variable que guarda la función a realizar
+				 ; fila 27
+ 0017 0D 0A 0D 0A 45 6C		    Resulta DB 13,10,13,10, 'El resultado es: $'
+       20 72 65 73 75 6C
+       74 61 64 6F 20 65
+       73 3A 20 24
+ 002D  000B [			    ResultaR DB 11 DUP(?)
+        00
+       ]
+ 0038 42 69 65 6E 76 65		    Mensaje DB 'Bienvenidos a EJ07, que le permite realizar las'
+       6E 69 64 6F 73 20
+       61 20 45 4A 30 37
+       2C 20 71 75 65 20
+       6C 65 20 70 65 72
+       6D 69 74 65 20 72
+       65 61 6C 69 7A 61
+       72 20 6C 61 73
+ 0067  0D 0A			        DB 13,10
+ 0069  6F 70 65 72 61 63	        DB 'operaciones BASICAS de MULTIPLICACION, DIVISION, SUMA'
+       69 6F 6E 65 73 20
+       42 41 53 49 43 41
+       53 20 64 65 20 4D
+       55 4C 54 49 50 4C
+       49 43 41 43 49 4F
+       4E 2C 20 44 49 56
+       49 53 49 4F 4E 2C
+       20 53 55 4D 41
+ 009E  79 20 72 65 73 74	        DB 'y resta sobre dos cantidades enteras.'
+       61 20 73 6F 62 72
+       65 20 64 6F 73 20
+       63 61 6E 74 69 64
+       61 64 65 73 20 65
+       6E 74 65 72 61 73
+       2E
+ 00C3  0D 0A 0D 0A 24		        DB 13,10,13,10, '$'
+ 00C8 0D 0A 0D 0A 44 49		    Pregunta DB 13,10,13,10,'DIGITE:',13,10,13,10
+       47 49 54 45 3A 0D
+       0A 0D 0A
+ 00D7  28 31 29 20 70 61	        DB '(1) para MULTIPLICAR.',13,10
+       72 61 20 4D 55 4C
+       54 49 50 4C 49 43
+       41 52 2E 0D 0A
+ 00EE  28 32 29 20 70 61	        DB '(2) para DIVIDIR.',13,10
+       72 61 20 44 49 56
+       49 44 49 52 2E 0D
+       0A
+ 0101  28 33 29 20 70 61	        DB '(3) para SUMAR.',13,10
+       72 61 20 53 55 4D
+       41 52 2E 0D 0A
+ 0112  28 34 29 20 70 61	        DB '(4) para RESTAR.',13,10
+       72 61 20 52 45 53
+       54 41 52 2E 0D 0A
+ 0124  28 35 29 20 70 61	        DB '(5) para TERMINAR.',13,10,'$' ; fila 40
+       72 61 20 54 45 52
+       4D 49 4E 41 52 2E
+       0D 0A 24
+ 0139 07 07 07 0D 0A 45		    Error DB 7,7,7,13,10,'Error: en la selección de las opciones.'
+       72 72 6F 72 3A 20
+       65 6E 20 6C 61 20
+       73 65 6C 65 63 63
+       69 C3 B3 6E 20 64
+       65 20 6C 61 73 20
+       6F 70 63 69 6F 6E
+       65 73 2E
+ 0166  0D 0A 0D 0A 24		        DB 13,10,13,10,'$'
+ 016B 07 07 07 0D 0A 45		    Error1 DB 7,7,7,13,10,'ERROR : digito INVALIDO en CANTIDAD 1.'
+       52 52 4F 52 20 3A
+       20 64 69 67 69 74
+       6F 20 49 4E 56 41
+       4C 49 44 4F 20 65
+       6E 20 43 41 4E 54
+       49 44 41 44 20 31
+       2E
+ 0196  0D 0A 0D 0A 24		        DB 13,10,13,10,'$'
+ 019B 07 07 07 0D 0A 45		    Error2 DB 7,7,7,13,10,'ERROR : digito INVALIDO en CANTIDAD 2.'
+       52 52 4F 52 20 3A
+       20 64 69 67 69 74
+       6F 20 49 4E 56 41
+       4C 49 44 4F 20 65
+       6E 20 43 41 4E 54
+       49 44 41 44 20 32
+       2E
+ 01C6  0D 0A 0D 0A 24		        DB 13,10,13,10,'$'
+ 01CB 07 07 07 0D 0A 45		    Error3 DB 7,7,7,13,10,'ERROR : cantidad fuera de RANGO (65535).'
+       52 52 4F 52 20 3A
+       20 63 61 6E 74 69
+       64 61 64 20 66 75
+       65 72 61 20 64 65
+       20 52 41 4E 47 4F
+       20 28 36 35 35 33
+       35 29 2E
+ 01F8  20 21 21 21 20		        DB ' !!! '
+				    ; ----------------------------
+ 01FD  0D 0A 0D 0A 24		        DB 13,10,13,10,'$'                ; fila 50
+ 0202 07 07 07 0D 0A 45		    Error4 DB 7,7,7,13,10,'ERROR : intento de DIVISION por CERO.'
+       52 52 4F 52 20 3A
+       20 69 6E 74 65 6E
+       74 6F 20 64 65 20
+       44 49 56 49 53 49
+       4F 4E 20 70 6F 72
+       20 43 45 52 4F 2E
+ 022C  0D 0A 0D 0A 24		        DB 13,10,13,10,'$'
+ 0231 0D 0A 0D 0A 44 69		    CantunoM DB 13,10,13,10, 'Digite primer cantidad(debe ser < a 65535)'
+       67 69 74 65 20 70
+       72 69 6D 65 72 20
+       63 61 6E 74 69 64
+       61 64 28 64 65 62
+       65 20 73 65 72 20
+       3C 20 61 20 36 35
+       35 33 35 29
+ 025F  3A 24			        DB ':$'
+ 0261 0D 0A 0D 0A 44 69		    CantdosM DB 13,10,13,10, 'Digite segunda cantidad (debe ser < a 65535)'
+       67 69 74 65 20 73
+       65 67 75 6E 64 61
+       20 63 61 6E 74 69
+       64 61 64 20 28 64
+       65 62 65 20 73 65
+       72 20 3C 20 61 20
+       36 35 35 33 35 29
+ 0291  3A 24			        DB ':$'
+ 0293 0001 000A 0064 03E8	        Potencia DW 0001h, 000Ah, 0064h, 03E8h, 2710h
+       2710
+ 029D 029D R			        PotenciaF DW $
+
+ 0000				.CODE                             ; Area de código
+ 0000				Empieza:                          ; Etiqueta de comienzo de programa //fila 60
+
+ 0000  B4 0F			Mov Ah,0Fh                        ; obtiene la modalidad de video actual
+ 0002  CD 10			Int 10h
+ 0004  B4 00			Mov Ah,0                          ; cambia la modalidad de video que se obtuvo
+ 0006  CD 10			Int 10h
+ 0008  B8 ---- R		Mov Ax,@Data                      ; inicializa Ds con la direccionde @data
+ 000B  8E D8			Mov Ds,Ax
+ 000D  BA 0038 R		Mov Dx,offset Mensaje             ; despliega el mensaje de bienvenida
+ 0010  E8 0131			Call Imprime
+ 0013  BE 002D R		Mov Si,offset ResultaR            ; inicializa la variable ResultaR
+ 0016  83 C6 0B			Add Si, 11                        ; fila 70
+ 0019  B0 24			Mov Al, '$'
+ 001B  88 04			Mov [Si],Al
+
+ 001D				OTRA:
+ 001D  BA 00C8 R		    Mov Dx,Offset Pregunta            ; despliega menu de opciones
+ 0020  E8 0121			    Call Imprime
+ 0023  E8 0123			    Call ObtenTecla                   ; espera a que el usuario seleccione la funcion por realizar (1 a 5)
+ 0026  3C 31			    Cmp Al,49                         ; la selección del usuario es mayor o igual
+ 0028  73 08			    Jae SIGUE                         ; a 1?.
+ 002A  BA 0139 R		    Mov Dx,offset Error               ; No, despliega mensaje de error
+ 002D  E8 0114			    Call Imprime                      ; fila 80
+ 0030  EB EB			    Jmp OTRA
+
+ 0032				SIGUE:
+ 0032  3C 35			    Cmp Al,53                         ; la seleccion del usuario es menor o igual
+ 0034  76 08			    Jbe TODOBIEN                      ; a 5?.
+ 0036  BA 0139 R		    Mov Dx,Offset Error               ; no, despliega mensaje de error
+ 0039  E8 0108			    Call Imprime
+ 003C  EB DF			    Jmp OTRA
+
+ 003E				TODOBIEN:
+ 003E  3C 35			    Cmp Al,53
+ 0040  75 02			    Jnz CHECATODO                     ; fila 90
+ 0042  EB 77			    Jmp FUNCION5
+				; ----------------------------
+ 0044				CHECATODO:
+ 0044  A2 0016 R		    Mov Funcion,Al                    ; Guarda la función a realizar
+				                                  ; _________________________
+				                                  ; SE CAPTURAN LAS CANTIDADES Y SE GUARDAN EN SUS RESPECTIVAS
+				                                  ; VARIABLES PARA PODER TRABAJAR SOBRE ELLAS MAS ADELANTE. LA CAPTURA
+				                                  ; SE BASA EN LA FUNCIÓN 09 DE LA INT 21H. DICHA FUNCION ESTABLECE QUE EL
+				                                  ; REGISTRO AH CONTENGA 09 Y EL REGISTRO PAR DS : DX APUNTE A LA DIRECCION
+				                                  ; DE LA VARIABLE QUE ALMACENARA LA ESTRUCTURA DEL BUFFER, EL CUAL DEBE
+				;fila 100
+				; ESTAR CONSTRUIDO DE LA SIGUIENTE MANERA:
+
+				; BYTE 1 = CANTIDAD DE BYTES POR LEER
+				; BYTE 2 = (LLENADO POR MS-DOS) ES LA CANTIDAD DE BYTES REALMENTE LEIDOS.
+				; BYTE 3 = BUFFER DONDE SE ALMACENA EL RESULTADO; DEBE ENCONTRARSE
+				; INICIALIZANDO CON LA MISMA CANTIDAD DE BYTES ESPECIFICADOS POR EL BYTE 1.
+
+				; LAS CANTIDADES CAPTURADAS REPRESENTAN UNA CADENA QUE ES NECESARIO
+				; CONVERTIR EN BINARIO ANTES DE QUE SE PUEDA OPERAR SOBRE ELLA. MAS
+				; ADELANTE SERA EVIDENTE LO ANTERIOR.
+				; ____________________________________
+				; __________________________
+				; CAPTURA PRIMERA CANTIDAD.
+				; __________________________
+ 0047				CAPCANT01:
+ 0047  BA 0231 R		    Mov Dx,Offset CantUnoM            ; Mensaje de captura de cantidad 1
+ 004A  E8 00F7			    Call Imprime
+ 004D  B4 0A			    Mov Ah,0Ah                        ; Captura la cantidad (hasta 8 digitos)
+ 004F  BA 0006 R		    Mov Dx,Offset CantUnoN
+ 0052  CD 21			    Int 21h                           ; fila 120
+ 0054  C6 06 0000 R 00		    Mov ErrorCAP,0                    ; Supone que no hay errores y que se esta operando
+ 0059  C6 06 0001 R 00		    Mov Cantidad,0                    ; Sobre la cantidad 1.
+ 005E  E8 00ED			    Call ConvNUM                      ; Convierte cantidad 1 a binario
+ 0061  80 3E 0000 R 01		    Cmp ErrorCAP,1                    ; ¿Hubo error?
+ 0066  74 DF			    Jz CAPCANT01                      ; Si, regresa a la captura
+ 0068  89 1E 0002 R		    Mov CantUnoR,Bx                   ; Guarda resultado de conversión
+				                                  ; ______________________
+				                                  ; CAPTURA SEGUNDA CANTIDAD.
+				                                  ; ______________________
+ 006C				CAPCANT02:
+ 006C  C6 06 0000 R 00		    Mov ErrorCAP,0                    ; Supone que no hay error
+ 0071  C6 06 0001 R 01		    Mov Cantidad,1                    ; Indica a ConvNUM que es la segunda cantidad
+ 0076  BA 0261 R		    Mov Dx,Offset CantDosM            ; Mensaje sobre captura de cantidad 2
+ 0079  E8 00C8			    Call Imprime
+ 007C  B4 0A			    Mov Ah,0Ah                        ; Captura la segunda cantidad
+ 007E  BA 000E R		    Mov Dx,Offset CantDosN
+ 0081  CD 21			    Int 21h
+				    ; ----------------------------
+ 0083  E8 00C8			    Call ConvNUM                      ; Convierte cantidad 2 a binario
+ 0086  80 3E 0000 R 01		    Cmp ErrorCAP,1                    ; ¿Hay error? //fila 140
+ 008B  74 DF			    Jz CAPCANT02                      ; Si, regresa a capturar la cantidad
+ 008D  89 1E 0004 R		    Mov CantDosR,Bx                   ; Guarda conversion de cantidad 2
+				                                    ; _____________________
+				                                    ; DESPUES DE CAPTURAR LAS DOS CANTIDADES SOBRE LAS CUALES SE VA A
+				                                    ; OPERAR, SE DEFINE CUAL ES LA FUNCION POR REALIZAR ( MULTIPLICACION,
+				                                    ; DIVISION, SUMA O RESTA).
+				                                    ; _____________________
+ 0091  A0 0016 R		    Mov Al,Funcion                    ; Funcion que selecciono el usuario
+ 0094  3C 31			    Cmp Al, 31h                       ; ¿Es 1?
+ 0096  75 05			    Jne FUNCION2                      ; No.
+ 0098  E8 0025			    Call Multiplica                   ; Multiplica las dos cantidades
+ 009B  EB 80			    Jmp OTRA
+ 009D				FUNCION2:
+ 009D  3C 32			    Cmp Al,32h                        ; ¿Es 2?
+ 009F  75 06			    Jne FUNCION3                      ; No.
+ 00A1  E8 0037			    Call Divide                       ; Divide las dos cantidades
+ 00A4  E9 FF76			    Jmp OTRA
+ 00A7				FUNCION3:
+ 00A7  3C 33			    Cmp Al,33h                        ; ¿Es 3?
+ 00A9  75 06			    Jne FUNCION4                      ; No. //fila 160
+ 00AB  E8 0056			    Call Suma                         ; Suma las dos cantidades
+ 00AE  E9 FF6C			    Jmp OTRA
+ 00B1				FUNCION4:
+ 00B1  3C 34			    Cmp Al,34h                        ; ¿Es 4?
+ 00B3  75 06			    Jne FUNCION5                      ; No.
+ 00B5  E8 006C			    Call Resta                        ; Resta las dos cantidades
+ 00B8  E9 FF62			    jmp OTRA
+ 00BB				FUNCION5:
+				; ________________
+				; TERMINA EL PROGRAMA
+				; ________________
+ 00BB  B8 4C00			Mov Ax,4C00h                      ; Termina el programa sin errores
+ 00BE  CD 21			Int 21h
+				; *******************************************************
+				; RUTINAS DE SOPORTE
+				; *******************************************************
+				; __________________
+				; Rutina : Multiplica
+				; ------------------------------
+				; Propósito : Multiplica dos números enteros sin signo
+				; Parámetros : En el registro AX el multiplicando y en BX el multiplicador ;fila 180
+				; Regresa : El resultado en el registro par DX : AX, que es desplegado en la pantalla.
+				; __________________
+ 00C0				Multiplica Proc Near
+ 00C0  33 D2			    Xor Dx,Dx                         ; Dx- 0 por si acaso
+ 00C2  A1 0002 R		    Mov Ax,CantUnoR                   ; Primera cantidad (multiplicando)
+ 00C5  8B 1E 0004 R		    Mov Bx,CantDosR                   ; Segunda cantidad(multiplicador)
+ 00C9  F7 E3			    Mul Bx                            ; Multiplica
+ 00CB  E8 00D3			    Call ConvASCII                    ; Convierte en ASCII
+ 00CE  BA 0017 R		    Mov Dx,Offset Resulta             ; Prepara para desplegar la cadena del resultado
+ 00D1  E8 0070			    Call Imprime
+ 00D4  BA 002D R		    Mov Dx,Offset ResultaR            ; Despliega el resultado.
+ 00D7  E8 006A			    Call Imprime
+ 00DA  C3			    Ret
+ 00DB				Multiplica Endp
+				; __________________________
+				; Rutina : Divide
+				; Propósito : Divide dos números enteros sin signo
+				; Parámetros : En el registro AX el dividendo y en BX el divisor
+				; Regresa : El resultado en el registro par DX : AX, que es desplegado en la pantalla.
+				; __________________________ //fila 200
+ 00DB				Divide Proc Near
+ 00DB  A1 0002 R		    Mov Ax,CantUnoR                   ; Carga la cantidad 1(dividiendo)
+ 00DE  8B 1E 0004 R		    Mov Bx,CantDosR                   ; Carga la cantidad 2(divisor)
+ 00E2  83 FB 00			    Cmp Bx,0                          ; Revisa si el divisor es 0 para evitar un error de división
+				    ; entre cero
+ 00E5  75 09			    Jnz DIVIDE01
+ 00E7  C6 06 0001 R 03		    Mov Cantidad,3                    ; Hubo error, asi que despliego el mensaje y salta
+ 00EC  E8 00ED			    Call HuboERROR
+ 00EF  C3			    Ret
+ 00F0				DIVIDE01:
+ 00F0  F7 F3			    Div Bx                            ; Divide
+ 00F2  33 D2			    Xor Dx,Dx                         ; Dx - 0. No se usa el residuo para simplificar las
+				    ; operaciones
+ 00F4  E8 00AA			    Call ConvASCII                    ; Convierte en ASCII
+ 00F7  BA 0017 R		    Mov Dx,Offset Resulta             ; Despliega la cadena del resultado
+ 00FA  E8 0047			    Call Imprime
+ 00FD  BA 002D R		    Mov Dx,Offset ResultaR            ; Despliega el resultado
+ 0100  E8 0041			    Call Imprime
+ 0103  C3			    Ret
+ 0104				Divide Endp
+				; ___________________________
+				; Rutina : Suma
+				; ------------------------------
+				; Propósito ; Suma dos números enteros sin signo
+				; Parámetros : En el registro AX el primer número y en BX el segundo
+				; Regresa : El resultado en el registro par DX : AX, que es desplegado en la pantalla.
+				; ___________________________
+ 0104				Suma Proc Near
+ 0104  33 D2			    Xor Dx,Dx                         ; Dx - 0 por si acaso existe acarreo
+ 0106  A1 0002 R		    Mov Ax,CantUnoR                   ; Primera cantidad //fila 230
+ 0109  8B 1E 0004 R		    Mov Bx,CantDosR                   ; Segunda cantidad
+ 010D  03 C3			    Add Ax,Bx                         ; Las suma
+ 010F  73 03			    Jnc SUMACONV                      ; ¿Hubo acarreo?
+ 0111  83 D2 00			    Adc Dx,0                          ; Si
+ 0114				SUMACONV:
+ 0114  E8 008A			    Call ConvASCII                    ; Convierte resultado en ASCII
+ 0117  BA 0017 R		    Mov Dx,Offset Resulta             ; Despliega cadena del resultado
+ 011A  E8 0027			    Call Imprime
+ 011D  BA 002D R		    Mov Dx,Offset ResultaR            ; Despliega el resultado
+ 0120  E8 0021			    Call Imprime
+ 0123  C3			    Ret
+ 0124				Suma Endp
+				; _________________
+				; Rutina : Resta
+				; Propósito : Resta dos números enteros sin signo
+				; Parámetros : En el registro AX el primer número y en BX el segundo
+				; Regresa : El resultado en el registro par DX : AX. Que es desplegado en la pantalla.
+				; __________________
+ 0124				Resta Proc Near
+ 0124  33 D2			    Xor Dx,Dx                         ; Dx =0 si acaso existe acarreo
+ 0126  A1 0002 R		    Mov Ax,CantUnoR                   ; Primera cantidad
+ 0129  8B 1E 0004 R		    Mov Bx,CantDosR                   ; Segunda cantidad
+ 012D  2B C3			    Sub Ax,Bx                         ; Resta cantidades
+ 012F  73 03			    Jnc RESTACONV                     ; ¿Hubo acarreo?
+ 0131  83 DA 00			    Sbb Dx,0                          ; Si
+ 0134				RESTACONV:
+ 0134  E8 006A			    Call ConvASCII                    ; Convierte en ASCII
+ 0137  BA 0017 R		    Mov Dx,Offset Resulta             ; Despliega cadena del resultado //fila 260
+ 013A  E8 0007			    Call Imprime
+ 013D  BA 002D R		    Mov Dx,Offset ResultaR            ; Despliega el resultado
+ 0140  E8 0001			    Call Imprime
+ 0143  C3			    Ret
+ 0144				Resta Endp
+				; _________________
+				; Rutina : Imprime
+				; ----------------------------------
+				; Propósito : Despliega una cadena
+				; Parámetros : El registro DX contiene el desplazamiento de la cadena
+				; Regresa : Nada
+				; __________________
+ 0144				Imprime Proc Near
+ 0144  B4 09			    Mov Ah,9                          ; prepara para desplegar la cadena a través de la
+ 0146  CD 21			    int 21h
+ 0148  C3			    Ret
+ 0149				Imprime Endp
+				; _________________
+				; Rutina : ObténTecla
+				; Propósito : Espera a que el usuario digite una tecla
+				; Parámetros : Ninguno
+				; Regresa : En el registro AL el código ASCII de la tecla
+				; __________________
+ 0149				ObtenTecla Proc Near
+ 0149  B4 00			    Mov Ah,0                          ; Lee una tecla del teclado a través de la INT 16h
+ 014B  CD 16			    Int 16h
+ 014D  C3			    Ret
+ 014E				ObtenTecla Endp
+				; _________________
+				; Rutina : ConvNUM //fila 290
+				; Propósito : Convertir una cadena en un entero largo
+				; Parámetros : La longitud de la cadena y la dirección de la misma, y se pasan a la pila.
+				; Regresa : En el registro par BX la cadena convertida en un entero
+				; __________________
+ 014E				ConvNUM Proc Near
+ 014E  BA 000A			    Mov Dx,0Ah                        ; Multiplicador es 10
+ 0151  80 3E 0001 R 00		    Cmp Cantidad,0                    ; ¿Es la cantidad 1?
+ 0156  75 0A			    Jnz CONVNUM01                     ; No, asi que es la cantidad 2
+ 0158  BF 0007 R		    Mov Di,Offset CantUnoN + 1        ; Bytes leidos de la cantidad 1
+ 015B  8B 0D			    Mov Cx,[Di]                       ; fila 300
+ 015D  BE 0008 R		    Mov SI,Offset CantUnoN + 2        ; La cantidad 1
+ 0160  EB 08			    Jmp CONVNUM02
+ 0162				CONVNUM01:
+ 0162  BF 000F R		    Mov Di,Offset CantDosN + 1        ; Bytes leidos de la cantidad 2
+ 0165  8B 0D			    Mov Cx,[Di]
+ 0167  BE 0010 R		    Mov Si,Offset CantDosN + 2        ; La cantidad 2
+ 016A				CONVNUM02:
+ 016A  32 ED			    Xor Ch,Ch                         ; Ch=0
+ 016C  BF 0293 R		    Mov Di,Offset Potencia            ; Direccion de la tabla de potencias
+ 016F  4E			    Dec Si                            ; Posicion si en el primer byte de la cadena capturada
+ 0170  03 F1			    Add Si,Cx                         ; le suma el desplazamiento de bytes leidos.
+				                                    ; -------------------------------------
+ 0172  33 DB			    Xor Bx,Bx
+ 0174  FD			    Std                               ; para que podamos posicionarnos en el final de la misma
+				                                  ; (apunta al último digito capturado). Bx = 0 y lee la cadena en
+				; forma inversa; es decir, de atrás hacia adelante.
+ 0175				CONVNUM03:
+ 0175  AC			    Lodsb                             ; Levanta un byte del numero (esta instruccion indica que el registro
+				    ; al sera cargado con el contenido de la direccion apuntada por ds:si)
+ 0176  3C 30			    Cmp Al,"0"                        ; ¿Es menor que 0?(entonces no es un digito valido)
+ 0178  72 18			    Jb CONVNUM04                      ; Si, despliega el mensaje de error y termina
+ 017A  3C 39			    Cmp Al,"9"                        ; ¿Es mayor que 9?(entonces no es un digito valido)
+ 017C  77 14			    Ja CONVNUM04                      ; Si, despliega el error y salta
+ 017E  2C 30			    Sub Al,30h                        ; Convierte el digito de ASCII a binario
+ 0180  98			    Cbw                               ; Convierte a palabra
+ 0181  8B 15			    Mov Dx,[Di]                       ; Obtiene la potencia de 10 que sera usada para
+ 0183  F7 E2			    Mul Dx                            ; Multiplicar, multiplica numero y lo suma
+ 0185  72 10			    Jc CONVNUM05
+ 0187  03 D8			    Add Bx,Ax                         ; Si hay acarreo la cantidad es >65535
+ 0189  72 0C			    Jc CONVNUM05
+ 018B  83 C7 02			    Add Di,2                          ; Va a la siguiente potencia de 10
+ 018E  E2 E5			    Loop CONVNUM03                    ; Itera hasta que CX sea = 0 //fila 330
+ 0190  EB 0D			    Jmp CONVNUM06
+ 0192				CONVNUM04:
+ 0192  E8 0047			    Call HuboERROR                    ; Algo ocurrió, despliega mensaje y salta
+ 0195  EB 08			    Jmp CONVNUM06
+ 0197				CONVNUM05:
+ 0197  C6 06 0001 R 02		    Mov Cantidad,2
+ 019C  E8 003D			    Call HuboERROR
+ 019F				CONVNUM06:
+ 019F  FC			    Cld
+ 01A0  C3			    Ret
+ 01A1				ConvNUM Endp
+
+
+				; _________________
+				; Rutina : ConvASCII
+				; Propósito : Convertir un valor binario en ASCII
+				; Parámetros : El registro par DX : AX
+				; Regresa : Nada, pero almacena el resultado en el buffer ResultaR
+				;fila 390
+				; __________________
+ 01A1				ConvASCII Proc Near
+ 01A1  52			    Push Dx
+ 01A2  50			    Push Ax                           ; Guarda el resultado
+ 01A3  BE 002D R		    Mov Si,Offset ResultaR            ; Inicializa la variable resultarllenandola
+ 01A6  B9 000A			    Mov CX,10                         ; Con asteriscos
+ 01A9  B0 2A			    Mov Al,'*'
+				; --------------------------------------
+ 01AB				CONVASCII01:
+ 01AB  88 04			    Mov [Si],Al                       ; fila 400
+ 01AD  46			    Inc Si
+ 01AE  E2 FB			    Loop CONVASCII01
+ 01B0  58			    Pop Ax
+ 01B1  5A			    Pop Dx
+ 01B2  8B D8			    Mov Bx,Ax                         ; Palabra baja de la cantidad
+ 01B4  8B C2			    Mov Ax,Dx                         ; Palabra alta de la cantidad
+ 01B6  BE 002D R		    Mov Si,Offset ResultaR            ; Cadena donde se guardara el resultado
+ 01B9  83 C6 0B			    Add Si,11
+ 01BC  B9 000A			    Mov Cx,10                         ; Divisor =10
+ 01BF				OBTENDIGITO:
+ 01BF  4E			    Dec Si
+ 01C0  33 D2			    Xor Dx,Dx                         ; Dx contendra el residuo
+ 01C2  F7 F1			    Div Cx                            ; Divide la palabra alta (Ax)
+ 01C4  8B F8			    Mov Di,Ax                         ; Guarda cociente (Ax)
+ 01C6  8B C3			    Mov Ax,Bx                         ; Ax = palabra baja (Bx)
+ 01C8  F7 F1			    Div Cx                            ; Dx tenia un residuo de la division anterior
+ 01CA  8B D8			    Mov Bx,Ax                         ; Guarda el cociente
+ 01CC  8B C7			    Mov Ax,Di                         ; Regresa la palabra alta
+ 01CE  80 C2 30			    Add Dl,30h                        ; Convierte residuo en ASCII
+ 01D1  88 14			    Mov [Si],Dl                       ; Lo almacena
+ 01D3  0B C0			    Or Ax,Ax                          ; ¿Palabra alta es 0?
+ 01D5  75 E8			    Jnz OBTENDIGITO                   ; No, sigue procesando ERROOOOOOOOOOOOR
+ 01D7  0B DB			    Or Bx,Bx                          ; ¿Palabra baja es 0?
+ 01D9  75 E4			    Jnz OBTENDIGITO                   ; No, sigue procesando
+ 01DB  C3			    Ret
+ 01DC				ConvASCII Endp
+				; _________________
+				; Rutina : HuboERROR
+				; Propósito : Desplegar el mensaje de error adecuado.
+				; Parámetros : Nada
+				; Regresa : Nada
+				; __________________
+ 01DC				HuboERROR Proc Near
+ 01DC  80 3E 0001 R 00		    Cmp Cantidad,0                    ; ¿Es la cantidad 1?
+ 01E1  75 0D			    Jnz HUBOERROR02                   ; No
+ 01E3  BA 016B R		    Mov Dx, Offset Error1
+ 01E6  E8 FF5B			    Call Imprime
+ 01E9  C6 06 0000 R 01		    Mov ErrorCAP,1                    ; Enciende la bandera de error
+ 01EE  EB 33			    Jmp HUBOERROR05
+ 01F0				HUBOERROR02:
+ 01F0  80 3E 0001 R 01		    Cmp Cantidad,1                    ; ¿Es la cantidad 2?
+ 01F5  75 0D			    Jnz HUBOERROR03                   ; No
+				                                    ; ------------------------------------------
+ 01F7  BA 019B R		    Mov Dx,Offset Error2
+ 01FA  E8 FF47			    Call Imprime
+ 01FD  C6 06 0000 R 01		    Mov ErrorCAP,1
+ 0202  EB 1F			    Jmp HUBOERROR05
+ 0204				HUBOERROR03:
+ 0204  80 3E 0001 R 02		    Cmp Cantidad,2                    ; ¿Cantidad capturada esta fuera de rango?
+ 0209  75 0D			    Jnz HUBOERROR04                   ; No /fila 450
+ 020B  BA 01CB R		    Mov Dx,Offset Error3
+ 020E  E8 FF33			    Call Imprime
+ 0211  C6 06 0000 R 01		    Mov ErrorCAP,1
+ 0216  EB 0B			    Jmp HUBOERROR05
+ 0218				HUBOERROR04:
+ 0218  BA 0202 R		    Mov Dx,Offset Error4              ; Error de intento de division por cero
+ 021B  E8 FF26			    Call Imprime
+ 021E  C6 06 0000 R 01		    Mov ErrorCAP,1
+ 0223				HUBOERROR05:
+ 0223  C3			    Ret
+ 0224				HuboERROR Endp
+				    .STACK
+				    End Empieza                       ; fila 463
+Microsoft (R) Macro Assembler Version 6.11		    11/09/23 23:20:39
+EJ07.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 029F	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0400	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0224	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+ConvASCII  . . . . . . . . . . .	P Near	 01A1	  _TEXT	Length= 003B Private
+ConvNUM  . . . . . . . . . . . .	P Near	 014E	  _TEXT	Length= 0053 Private
+Divide . . . . . . . . . . . . .	P Near	 00DB	  _TEXT	Length= 0029 Private
+HuboERROR  . . . . . . . . . . .	P Near	 01DC	  _TEXT	Length= 0048 Private
+Imprime  . . . . . . . . . . . .	P Near	 0144	  _TEXT	Length= 0005 Private
+Multiplica . . . . . . . . . . .	P Near	 00C0	  _TEXT	Length= 001B Private
+ObtenTecla . . . . . . . . . . .	P Near	 0149	  _TEXT	Length= 0005 Private
+Resta  . . . . . . . . . . . . .	P Near	 0124	  _TEXT	Length= 0020 Private
+Suma . . . . . . . . . . . . . .	P Near	 0104	  _TEXT	Length= 0020 Private
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+CAPCANT01  . . . . . . . . . . .	L Near	 0047	  _TEXT	
+CAPCANT02  . . . . . . . . . . .	L Near	 006C	  _TEXT	
+CHECATODO  . . . . . . . . . . .	L Near	 0044	  _TEXT	
+CONVASCII01  . . . . . . . . . .	L Near	 01AB	  _TEXT	
+CONVNUM01  . . . . . . . . . . .	L Near	 0162	  _TEXT	
+CONVNUM02  . . . . . . . . . . .	L Near	 016A	  _TEXT	
+CONVNUM03  . . . . . . . . . . .	L Near	 0175	  _TEXT	
+CONVNUM04  . . . . . . . . . . .	L Near	 0192	  _TEXT	
+CONVNUM05  . . . . . . . . . . .	L Near	 0197	  _TEXT	
+CONVNUM06  . . . . . . . . . . .	L Near	 019F	  _TEXT	
+CantDosN . . . . . . . . . . . .	Byte	 000E	  _DATA	
+CantDosR . . . . . . . . . . . .	Word	 0004	  _DATA	
+CantUnoN . . . . . . . . . . . .	Byte	 0006	  _DATA	
+CantUnoR . . . . . . . . . . . .	Word	 0002	  _DATA	
+CantdosM . . . . . . . . . . . .	Byte	 0261	  _DATA	
+Cantidad . . . . . . . . . . . .	Byte	 0001	  _DATA	
+CantunoM . . . . . . . . . . . .	Byte	 0231	  _DATA	
+DIVIDE01 . . . . . . . . . . . .	L Near	 00F0	  _TEXT	
+Empieza  . . . . . . . . . . . .	L Near	 0000	  _TEXT	
+Error1 . . . . . . . . . . . . .	Byte	 016B	  _DATA	
+Error2 . . . . . . . . . . . . .	Byte	 019B	  _DATA	
+Error3 . . . . . . . . . . . . .	Byte	 01CB	  _DATA	
+Error4 . . . . . . . . . . . . .	Byte	 0202	  _DATA	
+ErrorCAP . . . . . . . . . . . .	Byte	 0000	  _DATA	
+Error  . . . . . . . . . . . . .	Byte	 0139	  _DATA	
+FUNCION2 . . . . . . . . . . . .	L Near	 009D	  _TEXT	
+FUNCION3 . . . . . . . . . . . .	L Near	 00A7	  _TEXT	
+FUNCION4 . . . . . . . . . . . .	L Near	 00B1	  _TEXT	
+FUNCION5 . . . . . . . . . . . .	L Near	 00BB	  _TEXT	
+Funcion  . . . . . . . . . . . .	Byte	 0016	  _DATA	
+HUBOERROR02  . . . . . . . . . .	L Near	 01F0	  _TEXT	
+HUBOERROR03  . . . . . . . . . .	L Near	 0204	  _TEXT	
+HUBOERROR04  . . . . . . . . . .	L Near	 0218	  _TEXT	
+HUBOERROR05  . . . . . . . . . .	L Near	 0223	  _TEXT	
+Mensaje  . . . . . . . . . . . .	Byte	 0038	  _DATA	
+OBTENDIGITO  . . . . . . . . . .	L Near	 01BF	  _TEXT	
+OTRA . . . . . . . . . . . . . .	L Near	 001D	  _TEXT	
+PotenciaF  . . . . . . . . . . .	Word	 029D	  _DATA	
+Potencia . . . . . . . . . . . .	Word	 0293	  _DATA	
+Pregunta . . . . . . . . . . . .	Byte	 00C8	  _DATA	
+RESTACONV  . . . . . . . . . . .	L Near	 0134	  _TEXT	
+ResultaR . . . . . . . . . . . .	Byte	 002D	  _DATA	
+Resulta  . . . . . . . . . . . .	Byte	 0017	  _DATA	
+SIGUE  . . . . . . . . . . . . .	L Near	 0032	  _TEXT	
+SUMACONV . . . . . . . . . . . .	L Near	 0114	  _TEXT	
+TODOBIEN . . . . . . . . . . . .	L Near	 003E	  _TEXT	
+
+	   0 Warnings
+	   0 Errors

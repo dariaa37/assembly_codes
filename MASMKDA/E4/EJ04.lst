@@ -1,0 +1,116 @@
+Microsoft (R) Macro Assembler Version 6.11		    10/25/23 13:47:06
+EJ04.ASM						     Page 1 - 1
+
+
+				; Nombre del programa			:EJ04.ASM 
+				; Objetivo						:Despliega el título del programa y los
+				;								:números hexadecimales correspondientes 
+				; 								:el 15 al 1 en forma de escalera
+				;
+				; COMANDO DE ENSAMBLE			:MASM EJ04.ASM
+				; COMANDO DE ENLACE				:LINK EJ04.OBJ
+				; COMANDO DE EJECUCIÓN			:EJ04 [Enter]
+				;
+				;___________________________________________
+				; INICIA EL PROGRAMA, SE DEFINE EL MODELO DE
+				; MEMORIA A USAR Y EL SEGMENTO DE CODIGO
+				;___________________________________________
+
+				.MODEL SMALL 					;Modelo de memoria
+ 0000				.CODE 							;Área de código
+
+ 0000				Empieza: 						;Etiqueta de comienzo de programa
+
+ 0000  B8 ---- R		MOV AX, @Data 					;Permite el acceso a los datos inicializando 
+ 0003  8E D8			MOV DS, Ax 						;el registro DS con la dirección adecuada. 
+ 0005  BA 0000 R		MOV DX, OFFSET Mensaje 			;Carga la dirección de mensaje a DX para 
+ 0008  B4 09			MOV AH, 9 						;poder desplegarlo con la función 9 de la 
+ 000A  CD 21			INT 21H							;Int 21h (DS : DX contiene la dirección de la 
+												;cadena que se desplegará). 
+
+ 000C  B9 000F			MOV CX, 15 						;contador de los números (van a ser 15). 
+ 000F  BB 003B R		MOV BX, OFFSET Tabla 			;permite el acceso a la tabla de equivalencias 
+				 								;hexadecimales inicializando su dirección y 
+				 								;apuntando al primer elemento, 
+
+ 0012				ITERA: 			;Etiqueta controladora de la iteraciones. 
+ 0012  8A C1			MOV AL, CL		;Pone en Al al número por traducir (empezando 
+ 0014  D7			XLAT 			;desde 15) y lo traduce. 
+ 0015  8A D0			MOV DL, AL 		;Prepara para desplegar el número usando la 
+ 0017  B4 02			MOV AH, 2 		;función 2 de la Int 21h, Dl debe tener el carácter 
+ 0019  CD 21			INT 21H 		;que se desplegará. 
+ 001B  B2 0A			MOV DL, 10 		;Salta una línea dando un efecto de escalera. 
+ 001D  CD 21			INT 21H 		;De nuevo se usa la función 2. 
+ 001F  E2 F1			LOOP ITERA		;Itera hasta llegar a 0 (de 15 a 0). El registro CX 
+				 				;mantiene una cuenta activa de las veces que se ha
+
+												;iterado, y al completar un ciclo se decrementa en 
+				 								;uno hasta llegar a cero. 
+ 0021  B8 4C00			MOV AX, 4C00H 					;Regresa a MS-DOS por medio de la función 4c de
+
+												;la interrupción 21h. 
+ 0024  CD 21			INT 21H 						;El código de regreso es 0 porque no hubo error. 
+				 								;en caso de existir, se podría pasar un código 
+				 								;diferente a 0 (ej. 4c01h)
+
+				;___________________________________________ 
+				; INICIA SEGMENTO DE DATOS 
+				;___________________________________________ 
+ 0000				.DATA 							;Segmento de datos
+
+ 0000 0D 0A 0D 0A		Mensaje DB 13,10,13,10 
+ 0004  44 65 73 70 6C 65	DB 'Desplegando los números haxadecimales del 15 al 1' 
+       67 61 6E 64 6F 20
+       6C 6F 73 20 6E C3
+       BA 6D 65 72 6F 73
+       20 68 61 78 61 64
+       65 63 69 6D 61 6C
+       65 73 20 64 65 6C
+       20 31 35 20 61 6C
+       20 31
+ 0036  0D 0A 0D 0A 24		DB 13, 10, 13, 10, '$' 			;Cadena a desplegar
+
+ 003B 30 31 32 33 34 35		Tabla DB '0123456789ABCDEF'		;Tabla de traducción 
+       36 37 38 39 41 42
+       43 44 45 46
+				;_________________________________ 
+				; INICIA SEGMENTO DE PILA 
+				;_________________________________ 
+				.STACK							;Se necesita una PILA
+				END Empieza 					;Fin del programa
+Microsoft (R) Macro Assembler Version 6.11		    10/25/23 13:47:06
+EJ04.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 004B	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0400	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0026	  Word	  Public  'CODE'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+Empieza  . . . . . . . . . . . .	L Near	 0000	  _TEXT	
+ITERA  . . . . . . . . . . . . .	L Near	 0012	  _TEXT	
+Mensaje  . . . . . . . . . . . .	Byte	 0000	  _DATA	
+Tabla  . . . . . . . . . . . . .	Byte	 003B	  _DATA	
+
+	   0 Warnings
+	   0 Errors

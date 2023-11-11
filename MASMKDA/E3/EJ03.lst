@@ -1,0 +1,57 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 15:39:07
+EJ03.ASM						     Page 1 - 1
+
+
+				; Nombre del programa	:EJ03.ASM
+				; Objetivo		        :Desplegar una cadena
+
+				; COMANDO DE ENSAMBLE	:MASM EJ03.ASM
+				; COMANDO DE ENLACE	    :LINK EJ03.OBJ
+				; COMANDO DE EJECUCIÓN	:EJ03 [Enter]
+
+				; Define el modelo de memoria
+
+ 0000				CODE SEGMENT PUBLIC 'CODE'
+				ORG 100H
+				ASSUME CS : CODE, ES : CODE, DS : CODE, SS : CODE
+
+ 0100				Empieza:               ; Etiqueta de comienzo de programa
+
+ 0100  EB 11			JMP Codigo
+
+ 0102 48 6F 6C 61 2C 20		Mensaje DB 'Hola, qué tal! $'
+       71 75 C3 A9 20 74
+       61 6C 21 20 24
+
+ 0113				Codigo:
+ 0113  BA 0102 R		    MOV DX, offset Mensaje ; Dirección de mensaje
+ 0116  B4 09			    MOV AH,9             ; en Dx para poder desplegarlo
+ 0118  CD 21			    INT 21H                ; a través de la Int 21 del MS-DOS
+ 011A  B8 1450			    MOV AX,4C00            ; Regresa a MS-DOS por medio de la
+ 011D  CD 21			    INT 21H                ; Función 4C
+
+ 011F				CODE ENDS
+				END Empieza            ; Fin del programa
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 15:39:07
+EJ03.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CODE . . . . . . . . . . . . . .	16 Bit	 011F	  Para	  Public  'CODE'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+Codigo . . . . . . . . . . . . .	L Near	 0113	  CODE	
+Empieza  . . . . . . . . . . . .	L Near	 0100	  CODE	
+Mensaje  . . . . . . . . . . . .	Byte	 0102	  CODE	
+
+	   0 Warnings
+	   0 Errors

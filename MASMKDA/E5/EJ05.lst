@@ -1,0 +1,279 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/05/23 00:05:22
+EJ05.ASM						     Page 1 - 1
+
+
+				; Nombre del programa               :EJ05.ASM
+				; Objetivo:
+				; Demostrar cómo se usan las instrucciones para movimiento de datos, cómo se usa la pila y cómo
+				; mueven e inicializan bloques de memoria. El programa crea una tabla de 26 bytes que se
+				; inicializa con una serie de X. Después llena la  tabla con las letras A a Z en minusculas. Lee de
+				; nuevo la tabla convirtiendo las letras a mayúsculas, y finalmente la despliega.
+
+				; Se necesita el MASM Versión 5.X o mayor.
+
+				; COMANDO DE ENSAMBLE : Masm EJ05.ASM;
+				; COMANDO DE ENLACE :   Link EJ05.OBJ;
+				; COMANDO DE EJECUCION : EJ05 [Enter]
+
+				; _______________________________________
+				; INCIA EL PROGRAMA, SE DEFINE EL MODELO DE MEMORIA Y SE INICIALIZA EL SEGMENTO DE DATOS QUE PERMITIRA EL ACCESO A LOS DATOS.
+				; USANDO LAS INSTRUCCIONES ‘PUSH’ Y ‘POP’ SE INICIALIZA EL REGISTRO ‘ES’. LA INSTRUCCIÓN MOV AH, 0 Y LA INT 16H LE INDICAN
+				; AL PROGRAMA QUE DEBE ESPERAR HASTA QUE EL USUARIO DIGITE UNA TECLA. LAS INSTRUCCIONES ANTERIORES FORMAN PARTE DE LAS
+				; INTERRUPCIONES DEL BIOS.
+				; _______________________________________
+
+				.MODEL SMALL                          ; Modelo de memoria
+ 0000				.CODE                                 ; Área de código
+ 0000				Empieza:                              ; Etiqueta de comienzo de programa
+ 0000  B8 ---- R		Mov Ax, @Data                         ; Permite el acceso a los datos inicializando el registro
+ 0003  8E D8			Mov Ds, Ax                            ; DS con la dirección adecuada del segmento de datos
+				                                      ; (@Data). ES=DS se inicializa empujando el valor de
+ 0005  1E			Push Ds                               ; DS a la pila y extrayéndolo en ES. Despliega el
+ 0006  07			Pop Es                                ; mensaje de bienvenida usando
+ 0007  BA 0000 R		Mov Dx, Offset Mensaje                ; la función 9 de la Int 21.
+ 000A  B4 09			Mov Ah, 9
+ 000C  CD 21			Int 21h
+ 000E  B4 00			Mov Ah, 0                             ; Espera a que el usuario digite cualquier tecla usando
+ 0010  CD 16			Int 16h                               ; la Int 16h del BIOS.
+ 0012  8D 16 00EF R		Lea Dx, Mensaje1                      ; Despliega el mensaje ‘Desplegando tabla original…’
+ 0016  B4 09			Mov Ah, 9                             ; usando la instrucción LEA en lugar de OFFSET.
+ 0018  CD 21			Int 21h
+
+				; _______________________________
+				; EL SIGUIENTE CODIGO AGREGA EL SIMBOLO ‘$’ AL FINAL DE LA ESTRUCTURA ‘TABLA’ PARA QUE MS-DOS PUEDA DESPLEGAR LA TABLA
+				; USANDO LA FUNCIÓN 9 DE LA INT 21H. USA LA INSTRUCCIÓN ‘STOSB’ PARA LOGRARLO. ESTA INSTRUCCIÓN ALMACENA EL CONTENIDO DEL REGISTRO
+				; ‘AL’ EN LA DIRECCION APUNTADA POR EL REGISTRO DI. EL PRIMER PASO ES MOVER AL REGISTRO ‘AL’ EL SIMBOLO ‘$’ Y CALCULAR LA DIRECCION DE
+				; ‘TABLA’. UNA VEZ OBTENIDA LA DIRECCION, SE LE SUMA LA CANTIDAD DE 25 PARA LLEGAR AL FINAL DE LA TABLA (DE 0 A 25 SON 26).
+				; ES AQUÍ DONDE SE ALMACENA EL SIMBOLO ‘$’.
+				; ____________________________________________
+
+ 001A  B0 24			Mov Al, '$'                           ; Agrega a Tabla el símbolo ‘$’
+ 001C  BF 0247 R		Mov Di, Offset Tabla + 26             ; para que MS-DOS pueda ejecutar la
+ 001F  AA			Stosb                                 ; función 9 de la Int 21h. Dicho
+ 0020  BF 0261 R		Mov Di, Offset Tabla_1 + 26           ; símbolo es generado también para
+ 0023  AA			Stosb                                 ; Tabla_1.
+				                                      ; ____________________
+				                                      ; DESPLIEGA LA TABLA ORIGINAL INICIALIZADA CON UNA SERIE DE X.
+				                                      ; ____________________
+ 0024  B4 09			Mov Ah, 9
+ 0026  BA 022D R		Mov Dx, Offset Tabla                  ; Usa el comando Offset para desplegar la
+ 0029  CD 21			Int 21h                               ; tabla original inicializada con una serie de ‘X’.
+				                                      ; ____________________________
+				                                      ; DESPLIEGA EL MENSAJE ‘INICIALIZANDO TABLA…’ Y ESPERA A QUE EL
+				                                      ; USUARIO OPRIMA CUALQUIER TECLA.
+				                                      ; ____________________________
+ 002B  B4 09			Mov Ah, 9
+ 002D  BA 012B R		Mov Dx, Offset Mensaje2               ; Usa el comando Offset para desplegar el mensaje
+ 0030  CD 21			Int 21h                               ; sobre inicialización de la tabla.
+ 0032  B4 00			Mov Ah, 0
+ 0034  CD 16			Int 16h
+				; ________________________________
+				; INICIALIZA LA TABLA CON EL ALFABETO. CARGA EN EL REGISTRO “AL” LA
+				; PRIMERA LETRA QUE ES “a”. EL REGISTRO CX TIENE LA LONGITUD DE LA
+				; TABLA. SE ITERA HASTA LLENAR LA TABLA CON EL ALFABETO EN MINUSCULAS
+				; ________________________________
+ 0036  B9 001A			Mov Cx, 26                            ; Longitud de la tabla.
+ 0039  B0 61			Mov Al, 61h                           ; la letra ‘a’ (61H en ASCII)
+ 003B  8D 3E 022D R		Lea Di, Tabla                         ; Dirección de la tabla. Puesto que la operación es destino se
+ 003F  FC			Cld                                   ; usa DI.
+ 0040				InicializaTabla:
+ 0040  AA			Stosb                                 ; Almacena el contenido de Al en la dirección apuntada por
+ 0041  FE C0			Inc Al                                ; DI.
+ 0043  E2 FB			Loop InicializaTabla                  ; Repite hasta que Cx sea 0.
+ 0045  8D 16 01AA R		Lea Dx, Mensaje3                      ; Despliega mensaje3 mediante la instrucción LEA en
+ 0049  B4 09			Mov Ah, 9                             ; lugar de OFFSET, usando la misma función 9 de la
+ 004B  CD 21			Int 21h                               ; Int 21h.
+ 004D  B4 00			Mov Ah, 0                             ; Espera a que el usuario digite cualquier tecla
+ 004F  CD 16			Int 16h                               ; usando la Int 16h del BIOS.
+ 0051  B4 09			Mov Ah, 9
+ 0053  BA 022D R		Mov Dx, Offset Tabla                  ; Usa el comando Offset para desplegar la
+ 0056  CD 21			Int 21h                               ; tabla inicializada con minúsculas.
+				                                      ; _____________________________
+				                                      ; LEE LA TABLA DE NUEVO, CONVIERTE MINUSCULAS A MAYUSCULAS,
+				                                      ; ALMACENA EL RESULTADO EN TABLA_1 Y LA DESPLIEGA.
+				                                      ; _____________________________
+ 0058  BE 022D R		Mov Si, Offset Tabla                  ; Dirección de la tabla original (fuente).
+ 005B  BF 0247 R		Mov Di, Offset Tabla_1                ; Dirección de la tabla (destino).
+ 005E  B9 001A			Mov Cx, 26                            ; Longitud de la tabla.
+ 0061  FC			Cld                                   ; Lee hacia delante.
+ 0062				LeeTabla:
+ 0062  AC			Lodsb                                 ; Carga en Al el contenido de DS : SI.
+ 0063  24 5F			And Al, 5fh                           ; Convierte en mayúsculas.
+ 0065  AA			Stosb                                 ; Guarda de nuevo en ES : DI.
+ 0066  E2 FA			Loop LeeTabla                         ; Itera hasta que Cx sea 0.
+ 0068  8D 36 022D R		Lea Si, Tabla                         ; Dirección de Tabla (fuente).
+ 006C  8D 3E 0247 R		Lea Di, Tabla_1                       ; Dirección de Tabla_1 (destino).
+ 0070  B9 001A			Mov Cx, 26                            ; Longitud de la(s) Tabla(s).
+ 0073  FC			Cld
+ 0074  F3/ A4			REP Movsb                             ; Mueve el bloque de DS : SI a ES : DI.
+ 0076  BA 01F8 R		Mov Dx, Offset Mensaje4               ; Despliega mensaje4 usando la función
+ 0079  CD 21			Int 21h                               ; 9 de la interrupción 21h.
+ 007B  B4 09			Mov Ah, 9
+ 007D  8D 16 0247 R		Lea Dx, Tabla_1                       ; Despliega la tabla traducida a
+ 0081  CD 21			Int 21h                               ; mayúsculas.
+				                                      ; ____________________________________
+				                                      ; EL PROGRAMA TERMINA USANDO LA FUNCION 4C DE LA INT 21H. NO HAY
+				                                      ; ERROR ASE QUE EL CODIGO DE RETORNO ES 00.
+				                                      ; ____________________________________
+ 0083  B8 4C00			Mov Ax, 4c00h                         ; Regresa a MS-DOS mediante la función 4c. El
+ 0086  CD 21			Int 21h                               ; código de regreso es 0 porque no hubo error. En caso
+				                                      ; de existir alguno se podría pasar un código diferente
+				                                      ; de 0 (por ej. 4c01h).
+				                                      ; _______________________
+				                                      ; INICIA SEGMENTO DE DATOS
+				                                      ; _______________________
+ 0000				.DATA                                ; Segmento de datos
+ 0000 0D 0A			Mensaje Db 13, 10
+ 0002  42 69 65 6E 76 65	DB 'Bienvenidos al programa EJ05 !. En este programa se demostrará el uso '
+       6E 69 64 6F 73 20
+       61 6C 20 70 72 6F
+       67 72 61 6D 61 20
+       45 4A 30 35 20 21
+       2E 20 45 6E 20 65
+       73 74 65 20 70 72
+       6F 67 72 61 6D 61
+       20 73 65 20 64 65
+       6D 6F 73 74 72 61
+       72 C3 A1 20 65 6C
+       20 75 73 6F 20
+ 0049  64 65 6C 0D 0A		DB 'del' , 13, 10
+ 004E  6D 6F 76 69 6D 69	DB 'movimiento de BLOQUES de memoria, así como otro tipo de instrucciones '
+       65 6E 74 6F 20 64
+       65 20 42 4C 4F 51
+       55 45 53 20 64 65
+       20 6D 65 6D 6F 72
+       69 61 2C 20 61 73
+       C3 AD 20 63 6F 6D
+       6F 20 6F 74 72 6F
+       20 74 69 70 6F 20
+       64 65 20 69 6E 73
+       74 72 75 63 63 69
+       6F 6E 65 73 20
+ 0095  63 6F 6E 74 65 6E	DB 'contenidas en este capitulo. Favor de OPRIMIR cualquier TECLA cuando se '
+       69 64 61 73 20 65
+       6E 20 65 73 74 65
+       20 63 61 70 69 74
+       75 6C 6F 2E 20 46
+       61 76 6F 72 20 64
+       65 20 4F 50 52 49
+       4D 49 52 20 63 75
+       61 6C 71 75 69 65
+       72 20 54 45 43 4C
+       41 20 63 75 61 6E
+       64 6F 20 73 65 20
+ 00DD  65 6E 63 75 65 6E	DB 'encuentre listo. $'
+       74 72 65 20 6C 69
+       73 74 6F 2E 20 24
+
+ 00EF 0D 0A 0D 0A		Mensaje1 DB 13, 10, 13, 10
+ 00F3  44 65 73 70 6C 65	DB 'Desplegando Tabla ORIGINAL inicializada con XXXX…'
+       67 61 6E 64 6F 20
+       54 61 62 6C 61 20
+       4F 52 49 47 49 4E
+       41 4C 20 69 6E 69
+       63 69 61 6C 69 7A
+       61 64 61 20 63 6F
+       6E 20 58 58 58 58
+       E2 80 A6
+ 0126  0D 0A 0D 0A 24		DB 13, 10, 13, 10, '$'
+
+ 012B 0D 0A 0D 0A		Mensaje2 DB 13, 10, 13, 10
+ 012F  49 4E 49 43 49 41	DB 'INICIALIZANDO LA TABLA ORIGINAL CON EL ALFABETO'
+       4C 49 5A 41 4E 44
+       4F 20 4C 41 20 54
+       41 42 4C 41 20 4F
+       52 49 47 49 4E 41
+       4C 20 43 4F 4E 20
+       45 4C 20 41 4C 46
+       41 42 45 54 4F
+ 015E  43 4F 4D 50 4C 45	DB 'COMPLETO EN MINUSCULAS.',13,10
+       54 4F 20 45 4E 20
+       4D 49 4E 55 53 43
+       55 4C 41 53 2E 0D
+       0A
+ 0177  46 41 56 4F 52 20	DB 'FAVOR DE OPRIMIR CUALQUIER TECLA PARA CONTINUAR!!!$'
+       44 45 20 4F 50 52
+       49 4D 49 52 20 43
+       55 41 4C 51 55 49
+       45 52 20 54 45 43
+       4C 41 20 50 41 52
+       41 20 43 4F 4E 54
+       49 4E 55 41 52 21
+       21 21 24
+ 01AA 0D 0A 0D 0A		Mensaje3 DB 13,10,13,10
+ 01AE  54 41 42 4C 41 20	DB 'TABLA INICIALIZADA. FAVOR DE OPRIMIR'
+       49 4E 49 43 49 41
+       4C 49 5A 41 44 41
+       2E 20 46 41 56 4F
+       52 20 44 45 20 4F
+       50 52 49 4D 49 52
+ 01D2  43 55 41 4C 51 55	DB 'CUALQUIER TECLA PARA DESPLEGARLA...'
+       49 45 52 20 54 45
+       43 4C 41 20 50 41
+       52 41 20 44 45 53
+       50 4C 45 47 41 52
+       4C 41 2E 2E 2E
+ 01F5  0D 0A 24			DB 13,10,'$'
+ 01F8 0D 0A 0D 0A		Mensaje4 DB 13,10,13,10
+ 01FC  44 45 53 50 4C 45	DB 'DESPLEGANDO TABLA DEL ALFABETO EN MAYUSCULAS'
+       47 41 4E 44 4F 20
+       54 41 42 4C 41 20
+       44 45 4C 20 41 4C
+       46 41 42 45 54 4F
+       20 45 4E 20 4D 41
+       59 55 53 43 55 4C
+       41 53
+ 0228  0D 0A 0D 0A 24		DB 13,10,13,10,'$'
+ 022D  001A [			Tabla DB 26 DUP('X')
+        58
+       ]
+ 0247  001A [			Tabla_1 DB 26 DUP(?)
+        00
+       ]
+				; _______________________
+				; INICIA SEGMENTO DE PILA
+				;_______________________
+				.STACK                                ; Se necesita una pila
+				END EMPIEZA                           ; Fin del programa
+Microsoft (R) Macro Assembler Version 6.11		    11/05/23 00:05:22
+EJ05.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 0261	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0400	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0088	  Word	  Public  'CODE'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+Empieza  . . . . . . . . . . . .	L Near	 0000	  _TEXT	
+InicializaTabla  . . . . . . . .	L Near	 0040	  _TEXT	
+LeeTabla . . . . . . . . . . . .	L Near	 0062	  _TEXT	
+Mensaje1 . . . . . . . . . . . .	Byte	 00EF	  _DATA	
+Mensaje2 . . . . . . . . . . . .	Byte	 012B	  _DATA	
+Mensaje3 . . . . . . . . . . . .	Byte	 01AA	  _DATA	
+Mensaje4 . . . . . . . . . . . .	Byte	 01F8	  _DATA	
+Mensaje  . . . . . . . . . . . .	Byte	 0000	  _DATA	
+Tabla_1  . . . . . . . . . . . .	Byte	 0247	  _DATA	
+Tabla  . . . . . . . . . . . . .	Byte	 022D	  _DATA	
+
+	   0 Warnings
+	   0 Errors

@@ -1,0 +1,66 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 14:13:30
+EJ02.ASM						     Page 1 - 1
+
+
+				; Nombre del programa		        :EJ02.ASM
+				; Objetivo			                :Desplegar una cadena
+
+				; COMANDO DE ENSAMBLE		        :MASM EJ02.ASM
+				; COMANDO DE ENLACE		            :LINK EJ02.OBJ
+				; COMANDO DE EJECUCIÓN		        :EJ02 [Enter]
+
+				; Define el modelo de memoria
+
+				.MODEL SMALL                         ; Modelo de memoria
+ 0000				.CODE                                ; Área de código
+
+ 0000				Empieza:                             ; Etiqueta de comienzo de programa
+ 0000  B8 ---- R		mov Ax, @Data                        ; Inicializa DS con la
+ 0003  8E D8			mov Ds, Ax                           ; dirección de @Data
+ 0005  B4 09			mov Ah, 9                            ; en Dx para poder desplegarlo
+ 0007  CD 21			Int 21h                              ; a través de la Int 21 de MS-DOS
+ 0009  B8 4C00			mov ax, 4c00h                        ; Regresa a MS-DOS por medio de la
+ 000C  CD 21			Int 21h                              ; función 4C
+ 0000				.DATA                                ; Segmento de datos
+ 0000 48 6F 6C 61 20 4D		Mensaje DB 'Hola Mundo soy Karla!.$' ; Cadena a desplegar
+       75 6E 64 6F 20 73
+       6F 79 20 4B 61 72
+       6C 61 21 2E 24
+				.STACK                               ; Se necesita una pila
+
+				END Empieza                          ; Fin del programa
+
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 14:13:30
+EJ02.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 0017	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0400	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 000E	  Word	  Public  'CODE'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+Empieza  . . . . . . . . . . . .	L Near	 0000	  _TEXT	
+Mensaje  . . . . . . . . . . . .	Byte	 0000	  _DATA	
+
+	   0 Warnings
+	   0 Errors

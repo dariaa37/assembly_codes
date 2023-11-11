@@ -1,0 +1,262 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 16:26:10
+EJ06.ASM						     Page 1 - 1
+
+
+				; Nombre del programa : EJ06.ASM
+				; Objetivo : Captura dos cadenas y las compara, reportando si son iguales o no.
+				; La cantidad de caracteres a comparar está dada por los caracteres realmente leídos de la cadena 1.
+				; Es decir, para que se consideren iguales, las dos cadenas deben ser de la misma longitud.
+				; El programa distingue entre mayúsculas y minúsculas. La “A” es diferente de “a”. Con un poco más de
+				; creatividad, este programa se puede ampliar para que busque una cadena dentro de otra y reporte si existe o no.
+
+
+				; COMANDO DE ENSAMBLE : Masm EJ06.MASM;
+				; COMANDO DE ENLACE : Link EJ06.OBJ;
+				; COMANDO DE EJECUCION : EJ06 [Enter]
+
+
+				; NOTA : procure usar SOLO las instrucciones que se han visto o explicado.
+				; El procedimiento (objetivo) es con fines educativos y NO de optimización o
+				; eficiencia. Por favor, NO SE DESESPERE Y estúdielo.
+
+				.MODEL SMALL
+ 0000				.Data
+ 0000 0F 00			 Cadena1 DB 15,0,15 DUP(?)           ; Variable que almacena cadena 1
+       000F [
+        00
+       ]
+ 0011 0F 00			 Cadena2 DB 15,0,15 DUP(?)           ; Variable que almacena cadena 2
+       000F [
+        00
+       ]
+ 0022 42 69 65 6E 76 65		 Mensaje DB 'Bienvenidos a EJ06. Programa ejemplo que compara'
+       6E 69 64 6F 73 20
+       61 20 45 4A 30 36
+       2E 20 50 72 6F 67
+       72 61 6D 61 20 65
+       6A 65 6D 70 6C 6F
+       20 71 75 65 20 63
+       6F 6D 70 61 72 61
+ 0052  64 6F 73 20 63 61	 DB 'dos cadenas y reporta',13,10
+       64 65 6E 61 73 20
+       79 20 72 65 70 6F
+       72 74 61 0D 0A
+ 0069  73 69 20 73 6F 6E	 DB 'si son iguales o no. Para terminar digite FIN en'
+       20 69 67 75 61 6C
+       65 73 20 6F 20 6E
+       6F 2E 20 50 61 72
+       61 20 74 65 72 6D
+       69 6E 61 72 20 64
+       69 67 69 74 65 20
+       46 49 4E 20 65 6E
+ 0099  6D 61 79 C3 BA 73	 DB 'mayúsculas.'
+       63 75 6C 61 73 2E
+ 00A5  0D 0A 24			 DB 13,10,'$'
+ 00A8 07 07 07 0D 0A 45		 Error DB 7,7,7,13,10,'ERROR : cadenas son DIFERENTES!!!.'
+       52 52 4F 52 20 3A
+       20 63 61 64 65 6E
+       61 73 20 73 6F 6E
+       20 44 49 46 45 52
+       45 4E 54 45 53 21
+       21 21 2E
+ 00CF  0D 0A 0D 0A 24		 DB 13,10,13,10,'$'
+ 00D4 07 07 07 0D 0A 45		 Error1 DB 7,7,7,13,10, 'ERROR: cadena no puede ser NULA!!!.'
+       52 52 4F 52 3A 20
+       63 61 64 65 6E 61
+       20 6E 6F 20 70 75
+       65 64 65 20 73 65
+       72 20 4E 55 4C 41
+       21 21 21 2E
+ 00FC  0D 0A 0D 0A 24		 DB 13,10,13,10,'$'
+ 0101 46 49 4E			 Final DB 'FIN'
+ 0104 07 07 07 0D 0A 63		 TodoBien DB 7,7,7,13,10,'cadenas son IGUALES.'
+       61 64 65 6E 61 73
+       20 73 6F 6E 20 49
+       47 55 41 4C 45 53
+       2E
+ 011D  0D 0A 0D 0A 24		 DB 13,10,13,10,'$'
+ 0122 0D 0A 0D 0A 44 69		 CadUnoM DB 13,10,13,10, 'Digite primera CADENA: $'
+       67 69 74 65 20 70
+       72 69 6D 65 72 61
+       20 43 41 44 45 4E
+       41 3A 20 24
+ 013E 0D 0A 0D 0A 44 69		 CadDosM DB 13,10,13,10,'Digite segunda CADENA: $'
+       67 69 74 65 20 73
+       65 67 75 6E 64 61
+       20 43 41 44 45 4E
+       41 3A 20 24
+
+ 0000				.CODE                                ; Area de código
+ 0000				Empieza :                            ; Etiqueta de comienzo de programa
+				                                     ; ___________________________
+				                                     ; BORRA LA PANTALLA CAMBIANDO LA MODALIDAD DE VIDEO. ESTA FORMA DE
+				                                     ; BORRAR LA PANTALLA ES MUY PECULIAR Y SE CONSIDERA COMO UN “TRUCO”.
+				                                     ; SE BASA EN EL HECHO DE QUE AL CAMBIAR LA MODALIDAD DE VIDEO, EL
+				                                     ; PROPIO BIOS (HARDWARE) BORRA LA PANTALLA POR NOSOTROS.
+				                                     ; ES UN METODO BURDO PERO MUY EFICIENTE.
+				                                     ; __________________________________________
+
+ 0000  B4 0F			 Mov Ah, 0Fh                         ; Obtiene modalidad de video actual
+ 0002  CD 10			 Int 10h
+ 0004  B4 00			 Mov Ah, 0                           ; cambia a la modalidad de video que se obtuvo
+ 0006  CD 10			 Int 10h
+ 0008  B8 ---- R		 mov Ax, @Data                       ; Inicializa DS con la dirección de @Data
+ 000B  8E D8			 mov Ds, Ax
+ 000D  BA 0022 R		 mov Dx, Offset Mensaje              ; Despliega el mensaje de bienvenida
+ 0010  B4 09			 Mov Ah, 9
+ 0012  CD 21			 Int 21h
+ 0014  1E			 Push Ds
+ 0015  07			 Pop Es                              ; ES=DS
+				                                     ; _____________________________
+				                                     ; SE CAPTURAN LAS CADENAS Y SE GUARDAN EN SUS RESPECTIVAS VARIABLES PARA PODER TRABAJAR CON ELLAS MAS ADELANTE.
+				                                     ; LA CAPTURA SE BASA EN LA FUNCION 09 DE LA INT 21H.
+				                                     ; DICHA FUNCION ESTABLECE QUE EL REGISTRO AH CONTENGA 09 Y EL REGISTRO PAR DS : DX APUNTE A LA DIRECCION DE LA
+				                                     ; VARIABLE QUE ALMACENARA LA ESTUCTURA DEL BUFFER. ESTE DEBE ESTAR CONSTRUIDO DE LA SIGUIENTE MANERA:
+
+				                                     ; BYTE 1 = CANTIDAD DE BYTES A LEER
+				                                     ; BYTE 2 = (LLENADO POR MS-DOS) ES LA CANTIDAD DE BYTES REALMENTE
+				                                     ; LEIDOS.
+				                                     ; BYTE 3 = BUFFER DONDE SE ALMACENA EL RESULTADO. DEBE ENCONTRARSE
+				                                     ; INICIALIZADO CON LA MISMA CANTIDAD DE BYTES ESPECIFICADOS
+				                                     ; POR EL BYTE 1.
+
+				                                     ; LAS CANTIDADES CAPTURADAS REPRESENTAN UNA CADENA QUE ES
+				                                     ; NECESARIO CONVERTIR A BINARIO ANTES DE PODER OPERAR SOBRE ELLA.
+				                                     ; MAS ADELANTE QUEDARA CLARO LO ANTERIOR.
+				                                     ; ________________________________________
+				                                     ; ______________________
+				                                     ; CAPTURA PRIMER CADENA
+				;______________________
+ 0016				CAPCAD01:
+ 0016  BA 0122 R		 Mov Dx, Offset CadUnom              ; Mensaje de captura de cadena 1
+ 0019  B4 09			 Mov Ah, 9
+ 001B  CD 21			 Int 21h
+ 001D  B4 0A			 Mov Ah, 0Ah                         ; Captura la cantidad (hasta 15 bytes)
+ 001F  BA 0000 R		 Mov Dx, Offset Cadena1
+ 0022  52			 Push Dx                             ; Guarda dirección de variable
+ 0023  CD 21			 Int 21h
+ 0025  5A			 Pop Dx
+ 0026  42			Inc Dx                               ; Obtiene cantidad de bytes realmente leídos
+				                                     ; que se encuentra en el byte 1 del buffer
+ 0027  8B F2			 Mov Si, Dx
+ 0029  80 3C 00			 Cmp Byte ptr [Si], 0                ; ¿Es 0?
+ 002C  75 09			 Jnz CAPCAD02                        ; No, asi que prosigue
+ 002E  BA 00D4 R		 Mov Dx, Offset Error1               ; Despliega mensaje de error y captura la
+ 0031  B4 09			 Mov Ah, 9                           ; cadena de nuevo
+ 0033  CD 21			 Int 21h
+ 0035  EB DF			 Jmp CAPCAD01
+				 ; __________________________
+				 ; PRIMERO COMPRUEBA SE LA CADENA 1 TIENE LA CADENA “FIN” QUE
+				 ; ESPECIFICA TERMINAR ESTE PROGRAMA. SI LO ANTERIOR ES VERDADERO EL
+				 ; PROGRAMA TERMINA, DE LO CONTRARIO CAPTURA LA SEGUNDA CADENA Y
+				 ; PROSIGUE. “FIN” DEBE ESTAR EN MAYUSCULAS.
+				 ; __________________________
+ 0037				CAPCAD02:
+ 0037  42			 Inc Dx                              ; Primer byte del buffer de CADENA 1
+ 0038  B9 0003			 Mov Cx, 3                           ; Vamos a revisar 3 bytes
+ 003B  8B F2			 Mov Si, Dx                          ; Cadena capturada
+ 003D  BF 0101 R		 Mov Di, Offset Final                ; Mensaje de final
+ 0040  F3/ A6			 Repe Cmpsb                          ; ¿Digitaron "fin"?
+ 0042  E3 45			 Jcxz TERMINA                        ; Si; así que termina este programa
+
+ 0044				CAPCAD03:
+ 0044  BA 013E R		 Mov Dx, Offset CadDosM              ; Mensaje de captura de cadena 2
+ 0047  B4 09			 Mov Ah,9
+ 0049  CD 21			 Int 21h
+ 004B  B4 0A			 Mov Ah, 0Ah                         ; Captura la segunda cadena
+ 004D  BA 0011 R		 Mov Dx, Offset Cadena2
+ 0050  52			 Push Dx                             ; Guarda dirección de variable
+ 0051  CD 21			 Int 21h
+ 0053  5A			 Pop Dx
+ 0054  42			 Inc Dx                              ; Obtiene cantidad de bytes realmente leidos
+				                                     ; que se encuentra en el byte 1 del buffer
+ 0055  8B F2			 Mov Si, Dx
+ 0057  80 3C 00			 Cmp Byte ptr [Si], 0                ; ¿Es 0?
+ 005A  75 09			 Jnz CAPCAD04                        ; No, asi que prosigue
+ 005C  BA 00D4 R		 Mov Dx, Offset Error1               ; Despliega mensaje de error y captura la
+ 005F  B4 09			 Mov Ah, 9                           ; cadena de nuevo
+ 0061  CD 21			 Int 21h
+ 0063  EB DF			 Jmp CAPCAD03
+				 ; _____________________
+				 ; YA SE TIENEN LA DOS CADENAS CAPTURADAS, AHORA PROCEDEMOS A
+				 ; COMPARARLAS Y DESPLEGAR EL MENSAJE ADECUADO.
+				 ; _____________________
+ 0065				CAPCAD04:
+ 0065  32 ED			 Xor Ch, Ch                          ; Ch = 0 por si acaso.
+ 0067  BE 0001 R		 Mov Si, Offset Cadena1 + 1          ; Bytes realmente leídos de CADENA 1
+ 006A  8A 0C			 Mov Cl, byte ptr [Si]               ; Cx tiene bytes leídos de cadena 1
+ 006C  FE C1			 Inc Cl                              ; Ajusta CL debido a la naturaleza de la instrucción
+				                                     ; de comparación, y a manera en que se comporta
+				                                     ; la función 9 de la INT 21H
+ 006E  46			 Inc Si                              ; Regresa a direccion de cadena 1
+ 006F  BF 0013 R		 Mov Di, Offset Cadena2 + 2          ; Direccion de cadena 2
+ 0072  FC			 Cld
+ 0073  F3/ A6			 Repe Cmpsb                          ; Compara cadenas
+ 0075  E3 09			 Jcxz CAPCAD05                       ; ¿Son iguales?
+ 0077  BA 00A8 R		 Mov Dx, Offset Error                ; No, despliega mensaje
+ 007A  B4 09			 Mov Ah, 9
+ 007C  CD 21			 Int 21h
+ 007E  EB 96			 Jmp CAPCAD01
+ 0080				CAPCAD05:
+ 0080  BA 0104 R		 Mov Dx, offset todobien             ; Cadenas son iguales
+ 0083  B4 09			 Mov Ah, 9
+ 0085  CD 21			 Int 21h
+ 0087  EB 8D			 Jmp CAPCAD01
+				 ; _________________________
+				 ; TERMINA EL PROGRAMA
+				 ; _________________________
+ 0089				TERMINA:
+ 0089  B8 4C00			 Mov Ax, 4C00h
+ 008C  CD 21			 Int 21h                             ; Termina el programa sin errores.
+
+				 .STACK
+				 End Empieza
+
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 16:26:10
+EJ06.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 015A	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0400	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 008E	  Word	  Public  'CODE'	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+CAPCAD01 . . . . . . . . . . . .	L Near	 0016	  _TEXT	
+CAPCAD02 . . . . . . . . . . . .	L Near	 0037	  _TEXT	
+CAPCAD03 . . . . . . . . . . . .	L Near	 0044	  _TEXT	
+CAPCAD04 . . . . . . . . . . . .	L Near	 0065	  _TEXT	
+CAPCAD05 . . . . . . . . . . . .	L Near	 0080	  _TEXT	
+CadDosM  . . . . . . . . . . . .	Byte	 013E	  _DATA	
+CadUnoM  . . . . . . . . . . . .	Byte	 0122	  _DATA	
+Cadena1  . . . . . . . . . . . .	Byte	 0000	  _DATA	
+Cadena2  . . . . . . . . . . . .	Byte	 0011	  _DATA	
+Empieza  . . . . . . . . . . . .	L Near	 0000	  _TEXT	
+Error1 . . . . . . . . . . . . .	Byte	 00D4	  _DATA	
+Error  . . . . . . . . . . . . .	Byte	 00A8	  _DATA	
+Final  . . . . . . . . . . . . .	Byte	 0101	  _DATA	
+Mensaje  . . . . . . . . . . . .	Byte	 0022	  _DATA	
+TERMINA  . . . . . . . . . . . .	L Near	 0089	  _TEXT	
+TodoBien . . . . . . . . . . . .	Byte	 0104	  _DATA	
+
+	   0 Warnings
+	   0 Errors

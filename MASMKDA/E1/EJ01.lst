@@ -1,0 +1,61 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 14:03:03
+EJ01.ASM						     Page 1 - 1
+
+
+				; Nombre del programa		:EJ01.ASM 
+				; Objetivo			        :Programa sin DIRECTIVAS SIMPLIFICADAS
+				; 
+				; COMANDO DE ENSAMBLE		:MASM EJ01.ASM
+				; COMANDO DE ENLACE		    :LINK EJ01.OBJ
+				; COMANDO DE EJECUCIÓN		:EJ01 [Enter]
+				; 
+				; La siguiente línea especifica el segmento que contendrá 
+				; el bloque de código
+
+ 0000				CODE SEGMENT PUBLIC 'CODE'	;Segmento de código
+
+				; La siguiente línea le indica al ensamblador el nombre del segmento que cada 
+				; registro de segmentos debe direccionar
+
+				ASSUME CS: CODE, DS: CODE, ES: CODE, SS: STACK
+				ORG 0100
+
+				; Empieza el código
+ 0064				Empieza: 
+ 0064  B8 4C00			    MOV AX, 4C00H
+ 0067  CD 21			    INT	21H
+
+				; La siguiente línea le indica al ensamblador que termina el segmento de un código
+				;'CODE'
+ 0069				CODE ENDS
+				; El segmento STACK es el área que usará la pila
+ 0000				STACK SEGMENT PARA STACK 'STACK'
+ 0000  0040 [			    DW 64 DUP (?)
+        0000
+       ]
+ 0080				STACK ENDS
+				; Se cierra el bloque de código, termina el programa
+				END Empieza 		;Fin del programa
+
+Microsoft (R) Macro Assembler Version 6.11		    11/04/23 14:03:03
+EJ01.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CODE . . . . . . . . . . . . . .	16 Bit	 0069	  Para	  Public  'CODE'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0080	  Para	  Stack	  'STACK'	 
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+Empieza  . . . . . . . . . . . .	L Near	 0064	  CODE	
+
+	   0 Warnings
+	   0 Errors
