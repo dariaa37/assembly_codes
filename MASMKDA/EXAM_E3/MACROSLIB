@@ -1,0 +1,58 @@
+
+; __________________________
+ModalidadVideo MACRO              ; Macro para cambiar la modalidad de video
+    Mov Ah,0Fh                    ; obtiene la modalidad de video actual
+    Int 10h
+    Mov Ah,0H                     ; cambia la modalidad de video que se obtuvo
+    Int 10h
+ENDM
+
+InicializarPrograma MACRO         ; Macro para inicializar el programa
+    Mov Ax, @Data
+    Mov Ds, Ax
+ENDM
+
+Imprime MACRO cadena              ; Macro para imprimir un mensaje
+    MOV AH, 09H
+    LEA DX, cadena
+    INT 21H
+ENDM
+
+ObtenTecla MACRO                  ; Macro para obtener una tecla
+    Mov Ah,0                      ; Lee una tecla del teclado a través de la INT 16h
+    Int 16h
+ENDM
+
+InicializaVariable MACRO variable ; Macro para inicializar una variable
+    Mov Si,offset variable        ; inicializa la variable ResultaR
+    Add Si, 11                    ; fila 70
+    Mov Al, '$'
+    Mov [Si],Al
+ENDM
+
+CapturarCant MACRO cantidad
+    Mov Ah,0Ah                    ; Captura la cantidad (hasta 8 digitos)
+    Mov Dx,Offset cantidad
+    Int 21h                       ; fila 120
+    Mov ErrorCAP,0                ; Supone que no hay errores y que se esta operando
+    Mov Cantidad,0                ; Sobre la cantidad 1.
+ENDM
+
+; __________________________
+Multiplicar MACRO Num
+    Mov Ax,Num                    ; Primera cantidad (multiplicando)
+    Mov Bx,3CH                    ; 60 en hexadecimal (multiplicador)
+    Mul Bx                        ; Multiplica
+ENDM
+
+Dividir MACRO Num
+    Mov Ax, Num                   ; Carga la cantidad 1(dividiendo)
+    Mov Bx, 3CH                   ; Carga la cantidad 2(divisor)
+    Div Bx                        ; Divide
+    Xor Dx,Dx                     ; Dx - 0. No se usa el residuo para simplificar las operaciones
+ENDM                              ; entre cero
+
+TerminarPrograma MACRO
+    Mov Ax,4C00h                  ; Termina el programa sin errores
+    Int 21h
+ENDM
